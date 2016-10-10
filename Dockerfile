@@ -9,6 +9,16 @@ RUN apk update && apk upgrade \
       && apk add --no-cache ${REQUIRED_PACKAGES}
 
 
+#### ADD NORMAL USER ####
+ENV USER alpine
+RUN adduser -D ${USER} \
+      && echo "${USER}   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers 
+
+RUN mkdir -p /opt/
+RUN chown -R ${USER} /opt/
+USER ${USER}
+
+
 #### GET NWJS RUNTIME ####
 # From http://nwjs.io/downloads/
 ARG NWJS_VERSION="0.16.0"
@@ -17,40 +27,22 @@ ENV NWJS_VERSION ${NWJS_VERSION}
 COPY scripts/download-nwjs.sh /opt/
 RUN sh /opt/download-nwjs.sh
 
-# RUN ls /opt
+# ### CONFIG NPM when installing packages ###
+# # --no-bin-links by default
+# RUN npm config set bin-links false
+# # This is a common issue when running npm install in a Docker or Vagrant VM
+# # See: https://github.com/npm/npm/issues/9901
 
-# #### Script to copy NWJS runtime to /project directory ####
-# # RUN echo "cp -ru /opt/nwjs /project/" > /opt/copy_nwjs_to_project.sh
-# # RUN rsync -a /opt/nwjs/ /project/nwjs
-# COPY init.sh  /opt/
-# COPY package.sh /opt/
+# # Also --no-optional by default
+# RUN npm config set optional false
 
-#### ADD NORMAL USER ####
-ENV USER alpine
-RUN adduser -D ${USER} \
-      && echo "${USER}   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers 
-
-
-#### CREATE WORKING DIRECTORY FOR USER ####
-ENV WORKDIR /project
-RUN mkdir ${WORKDIR}
-RUN chown -R ${USER} ${WORKDIR}
-
-WORKDIR ${WORKDIR}
-# USER ${USER}
+COPY scripts /opt/scripts
+COPY shortcuts /opt/shortcuts
 
 
-### CONFIG NPM when installing packages ###
-# --no-bin-links by default
-RUN npm config set bin-links false
-# This is a common issue when running npm install in a Docker or Vagrant VM
-# See: https://github.com/npm/npm/issues/9901
+WORKDIR /mnt
 
-# Also --no-optional by default
-RUN npm config set optional false
-COPY scripts/package.sh /opt/
-COPY scripts/tasks.sh /opt/
-ENTRYPOINT ["/opt/tasks.sh"]
+ENTRYPOINT ["sh", "/opt/scripts/tasks.sh"]
 CMD ["-h"]
 # CMD ["/bin/sh", "/opt/init.sh"]
 # CMD ["/bin/ash"]

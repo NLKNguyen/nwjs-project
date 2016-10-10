@@ -1,4 +1,7 @@
 #!/bin/sh
+set -e
+
+MOUNTED_DIR="/mnt"
 
 # Default values if providing empty
 NWJS_ARCHS="win-x64 win-ia32 linux-x64 linux-ia32 osx-x64"
@@ -8,9 +11,8 @@ PACKAGE_NAME="app"
 
 usage ()
 {
-    echo "if this was a real script you would see something useful here"
+    echo "NWJS PROJECT"
     echo ""
-    echo "./simple_args_parsing.sh"
     echo "  -h --help"
     echo "  --shell"
     echo "  "
@@ -39,8 +41,8 @@ TASK_NWJS_SDK=0
 
 while [ "$1" != "" ]; 
 do
-    PARAM=`echo $1 | awk -F= '{print $1}'`
-    VALUE=`echo $1 | awk -F= '{print $2}'`
+    PARAM=$(echo "$1" | awk -F= '{print $1}')
+    VALUE=$(echo "$1" | awk -F= '{print $2}')
 
     case $PARAM in
         -h | --help)
@@ -84,13 +86,13 @@ done
 if [ $TASK_NWJS -eq 1 ]; then
     for arch in $NWJS_ARCHS
     do
-        if [[ -d "/opt/nwjs/$arch" ]]; then
-            echo -n "Copy NW.js runtime for $arch to project directory... "
+        if [ -d "/opt/nwjs/$arch" ]; then
+            printf "Copy NW.js runtime for %s to project directory... " "$arch"
 
-            mkdir -p /project/nwjs
-            rsync -a /opt/nwjs/${arch} /project/nwjs/
-              
-            [ "$?" -ne 0 ] && echo "ERROR: can't copy nwjs/$arch" && exit 1
+            mkdir -p ${MOUNTED_DIR}/nwjs
+            rsync -a "/opt/nwjs/${arch}" ${MOUNTED_DIR}/nwjs/ 
+            rsync -a "/opt/shortcuts/nw.$arch.desktop" ${MOUNTED_DIR}/
+            chmod +x "${MOUNTED_DIR}/nw.$arch.desktop"
 
             echo "done"
         else
@@ -105,13 +107,11 @@ fi
 if [ $TASK_NWJS_SDK -eq 1 ]; then
     for arch in $NWJS_SDK_ARCHS
     do
-        if [[ -d "/opt/nwjs-sdk/$arch" ]]; then
-            echo -n "Copy NW.js SDK runtime for $arch to project directory... "
+        if [ -d "/opt/nwjs-sdk/$arch" ]; then
+            printf "Copy NW.js runtime for %s to project directory... " "$arch"
 
-            mkdir -p /project/nwjs-sdk
-            rsync -a /opt/nwjs-sdk/${arch} /project/nwjs-sdk/
-
-            [ "$?" -ne 0 ] && echo "ERROR: can't copy nwjs-sdk/$arch" && exit 1
+            mkdir -p ${MOUNTED_DIR}/nwjs-sdk
+            rsync -a "/opt/nwjs-sdk/${arch}" ${MOUNTED_DIR}/nwjs-sdk/
 
             echo "done"
         else
@@ -124,34 +124,6 @@ fi
 #######################
 # TASK: PACKAGE
 if [ $TASK_PACKAGE -eq 1 ]; then
-    echo "sh /opt/package.sh \"$PACKAGE_NAME\" \"$PACKAGE_ARCHS\""
-    sh /opt/package.sh "$PACKAGE_NAME" "$PACKAGE_ARCHS"
-    
+    echo "sh /opt/scripts/package.sh \"$PACKAGE_NAME\" \"$PACKAGE_ARCHS\""
+    sh /opt/scripts/package.sh "$PACKAGE_NAME" "$PACKAGE_ARCHS"
 fi
-
-# echo "ENVIRONMENT is $ENVIRONMENT";
-# echo "DB_PATH is $DB_PATH";
-
-# echo '--init'
-
-# echo -n 'Getting NW.js runtime to the directory ./nwjs/ .... '
-# rsync -a /opt/nwjs/ /project/nwjs
-# [ "$?" -ne 0 ] && echo failed && exit 1
-# echo done
-# case "$arch" in
-#     *win-x64*)
-#         rsync -a /opt/nwjs/win-x64 /project/nwjs/win-x64
-#         [ "$?" -ne 0 ] && echo "ERROR: can't copy nwjs/$arch" && exit 1
-#         ;;
-# esac
-# echo "arch=$arch"
-# if [[ "win-x64" == *win-x64* ]]
-# then
-#     echo "in"
-#     rsync -a /opt/nwjs/${arch} /project/nwjs/${arch}
-#     [ "$?" -ne 0 ] && echo "ERROR: can't copy nwjs/$arch" && exit 1
-# else
-#     echo "ERROR: unknown architecture $arch for --nwjs"
-#     echo "All possible architectures to include: --nwjs=\"$valid_archs\" "
-#     exit 1
-# fi

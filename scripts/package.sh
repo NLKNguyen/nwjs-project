@@ -1,4 +1,8 @@
 #!/bin/sh
+set -e
+
+MOUNTED_DIR="/mnt"
+
 echo '--package'
 
 PACKAGE_NAME=$1
@@ -6,13 +10,113 @@ PACKAGE_ARCHS=$2
 
 echo "packaging $PACKAGE_NAME for $PACKAGE_ARCHS"
 
-# echo 'packaging: get source from project directory...'
-# if [ -e /project/.nwjsignore ]; then
-#   rsync -a --exclude-from=/project/.nwjsignore  /project/ /tmp/project
-# else
-#   rsync -a --exclude 'nwjs' /project/ /tmp/project
-# fi
+echo 'packaging: get source from project directory...'
+if [ -e ${MOUNTED_DIR}/.nwjsignore ]; then
+    echo "Found .nwjsignore => Use for ignoring files from source directory"
+    rsync -a --exclude-from=${MOUNTED_DIR}/.nwjsignore  ${MOUNTED_DIR}/ /tmp/src
+else
+    rsync -a --exclude='nwjs' --exclude='nwjs-sdk' --exclude='release' ${MOUNTED_DIR}/ /tmp/src
+fi
 
+
+cd /tmp/src/
+# BUILD
+if [ -e ${MOUNTED_DIR}/build-script.sh ]; then
+    printf "Found build-script.sh => Executing... "
+    sh ${MOUNTED_DIR}/build-script.sh
+    echo "done"
+fi
+
+echo ""
+
+for arch in $PACKAGE_ARCHS
+do
+    
+    if [ -d "/opt/nwjs-sdk/$arch" ]; then
+        echo "Create package for $arch in release directory... "
+
+        case $arch in
+        *osx*)
+            mkdir -p "$MOUNTED_DIR/release/$arch/package.nw/"
+            echo "Copy project source files... "
+            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
+
+            cd "$MOUNTED_DIR/release/$arch/"
+
+            echo "Copy runtime files for $arch..."
+            if [ -e ${MOUNTED_DIR}/.nwjsignore ]; then
+                echo "Found .nwjsignore => Use for ignoring files from NW.js runtime directory"
+                rsync -a --exclude-from=${MOUNTED_DIR}/.nwjsignore "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
+            else
+                rsync -a "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
+            fi
+
+            mv package.nw nwjs.app/Contents/Resources/
+            mv nwjs.app "$PACKAGE_NAME.app"
+
+            printf "Make zip file... "
+            cd "$MOUNTED_DIR/release/"
+            zip -r "$arch.zip" "$arch/"
+            echo "done"
+            ;;
+
+        *win*)
+            mkdir -p "$MOUNTED_DIR/release/$arch/package.nw/"
+
+            cd "$MOUNTED_DIR/release/$arch/"
+
+            echo "Copy runtime files for $arch..."
+            if [ -e ${MOUNTED_DIR}/.nwjsignore ]; then
+                echo "Found .nwjsignore => Use for ignoring files from NW.js runtime directory"
+                rsync -a --exclude-from=${MOUNTED_DIR}/.nwjsignore "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
+            else
+                rsync -a "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
+            fi
+
+            echo "Copy project source files... "
+            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
+            
+            printf "Make zip file... "
+            cd "$MOUNTED_DIR/release/"
+            zip -r "$arch.zip" "$arch/"
+            echo "done"                 
+            ;;
+
+        *linux*)
+            mkdir -p "$MOUNTED_DIR/release/$arch/package.nw/"
+
+            cd "$MOUNTED_DIR/release/$arch/"
+
+            echo "Copy runtime files for $arch..."
+            if [ -e ${MOUNTED_DIR}/.nwjsignore ]; then
+                echo "Found .nwjsignore => Use for ignoring files from NW.js runtime directory"
+                rsync -a --exclude-from=${MOUNTED_DIR}/.nwjsignore "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
+            else
+                rsync -a "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
+            fi
+
+            echo "Copy project source files... "
+            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
+            
+            cp /opt/shortcuts/app.desktop "$PACKAGE_NAME.desktop"
+            sed -i "s/Name=app/Name=$PACKAGE_NAME/g" "$PACKAGE_NAME.desktop"
+            chmod +x "$PACKAGE_NAME.desktop"
+
+            printf "Make zip file... "
+            cd "$MOUNTED_DIR/release/"
+            zip -r "$arch.zip" "$arch/"
+            echo "done"                   
+            ;;
+        esac
+
+
+
+        echo "done"
+    else
+        echo "ERROR: unknown architecture $arch for --package"
+        exit 1
+    fi
+done
 # mkdir -p /tmp/release/
 
 # echo 'packaging: prepare for win64 release...'
