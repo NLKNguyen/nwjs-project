@@ -7,6 +7,7 @@ echo '--package'
 
 PACKAGE_NAME=$1
 PACKAGE_ARCHS=$2
+PACKAGE_VERSION=$3
 
 echo "packaging $PACKAGE_NAME for $PACKAGE_ARCHS"
 
@@ -56,7 +57,7 @@ do
 
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
-            zip -r "$arch.zip" "$arch/"
+            zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
             echo "done"
             ;;
 
@@ -78,7 +79,7 @@ do
             
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
-            zip -r "$arch.zip" "$arch/"
+            zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
             echo "done"                 
             ;;
 
@@ -104,7 +105,7 @@ do
 
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
-            zip -r "$arch.zip" "$arch/"
+            zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
             echo "done"                   
             ;;
         esac
