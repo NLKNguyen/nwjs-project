@@ -12,7 +12,7 @@ RUN apk update && apk upgrade \
 #### ADD NORMAL USER ####
 ENV USER alpine
 RUN adduser -D ${USER} \
-      && echo "${USER}   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers 
+      && echo "${USER}   ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 RUN mkdir -p /opt/
 RUN chown -R ${USER} /opt/
@@ -21,7 +21,7 @@ USER ${USER}
 
 #### GET NWJS RUNTIME ####
 # From http://nwjs.io/downloads/
-ARG NWJS_VERSION="0.16.0"
+ARG NWJS_VERSION="0.19.4"
 ENV NWJS_VERSION ${NWJS_VERSION}
 
 COPY scripts/download-nwjs.sh /opt/

@@ -7,7 +7,7 @@ echo '--package'
 
 PACKAGE_NAME=$1
 PACKAGE_ARCHS=$2
-PACKAGE_VERSION=$3
+# PACKAGE_VERSION=$3
 
 echo "packaging $PACKAGE_NAME for $PACKAGE_ARCHS"
 
@@ -32,7 +32,7 @@ echo ""
 
 for arch in $PACKAGE_ARCHS
 do
-    
+
     if [ -d "/opt/nwjs-sdk/$arch" ]; then
         echo "Create package for $arch in release directory... "
 
@@ -76,11 +76,11 @@ do
 
             echo "Copy project source files... "
             rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
-            
+
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
             zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
-            echo "done"                 
+            echo "done"
             ;;
 
         *linux*)
@@ -98,7 +98,7 @@ do
 
             echo "Copy project source files... "
             rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
-            
+
             cp /opt/shortcuts/app.desktop "$PACKAGE_NAME.desktop"
             sed -i "s/Name=app/Name=$PACKAGE_NAME/g" "$PACKAGE_NAME.desktop"
             chmod +x "$PACKAGE_NAME.desktop"
@@ -106,7 +106,7 @@ do
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
             zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
-            echo "done"                   
+            echo "done"
             ;;
         esac
 

@@ -8,6 +8,8 @@ services:
 before_install:
   - shopt -s expand_aliases  # allow alias
   - shopt -s globstar  # allow use of **
+  - export DOCKER_REPO=nlknguyen/nwjs-project
+  - export TAG=$([ "$TRAVIS_BRANCH" == "master" ] && echo "latest" || echo "$TRAVIS_BRANCH")
 
 install:
   - docker pull nlknguyen/alpine-shellcheck
@@ -15,4 +17,9 @@ install:
 
 script:
   - shellcheck --version
-  - shellcheck **/*.sh
+  - shellcheck **/*.sh && docker build -t $DOCKER_REPO:$TAG .
+
+after_success:
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker push $DOCKER_REPO:$TAG
+
