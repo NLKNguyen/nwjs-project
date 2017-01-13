@@ -39,7 +39,7 @@ TASK_NWJS_SDK=0
 # Default argument if empty
 [ "$1" = "" ] && set -- "--shell"
 
-while [ "$1" != "" ]; 
+while [ "$1" != "" ];
 do
     PARAM=$(echo "$1" | awk -F= '{print $1}')
     VALUE=$(echo "$1" | awk -F= '{print $2}')
@@ -49,7 +49,7 @@ do
             usage
             exit
             ;;
-            
+
         --shell)
             ash
             exit
@@ -90,10 +90,25 @@ if [ $TASK_NWJS -eq 1 ]; then
             printf "Copy NW.js runtime for %s to project directory... " "$arch"
 
             mkdir -p ${MOUNTED_DIR}/nwjs
-            rsync -a "/opt/nwjs/${arch}" ${MOUNTED_DIR}/nwjs/ 
-            rsync -a "/opt/shortcuts/nw.$arch.desktop" ${MOUNTED_DIR}/
-            chmod +x "${MOUNTED_DIR}/nw.$arch.desktop"
+            rsync -a "/opt/nwjs/${arch}" ${MOUNTED_DIR}/nwjs/
 
+            echo "done"
+
+            printf "Copy shortcut launcher for %s to project directory... " "$arch"
+            case $arch in
+                *osx*)
+                    rsync -a "/opt/shortcuts/nw.$arch.command" ${MOUNTED_DIR}/
+                    chmod +x "${MOUNTED_DIR}/nw.$arch.command"
+                    ;;
+                *linux*)
+                    rsync -a "/opt/shortcuts/nw.$arch.desktop" ${MOUNTED_DIR}/
+                    chmod +x "${MOUNTED_DIR}/nw.$arch.desktop"
+                    ;;
+                *win*)
+                    echo "Currently not available for Windows yet"
+                    # TODO: Windows shit goes here
+                    ;;
+            esac
             echo "done"
         else
             echo "ERROR: unknown architecture $arch for --nwjs"

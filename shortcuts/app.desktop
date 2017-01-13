@@ -1,9 +1,0 @@
-[Desktop Entry]
-
-Type=Application
-
-Name=app
-
-Exec=sh -c "cd `dirname %k`; ./nw"
-
-Terminal=false
