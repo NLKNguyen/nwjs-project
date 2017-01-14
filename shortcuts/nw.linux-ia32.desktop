@@ -4,7 +4,7 @@ Type=Application
 
 Name=nw.linux-x64
 
-Exec=sh -c "cd `dirname %k`; ./nwjs/linux-x32/nw ."
+Exec=sh -c "cd `dirname %k`; ./nwjs/linux-ia32/nw ."
 
 Terminal=false
 

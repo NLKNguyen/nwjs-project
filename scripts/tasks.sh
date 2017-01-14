@@ -93,7 +93,7 @@ if [ $TASK_NWJS -eq 1 ]; then
             rsync -a "/opt/nwjs/${arch}" ${MOUNTED_DIR}/nwjs/
 
             echo "done"
-
+            
             printf "Copy shortcut launcher for %s to project directory... " "$arch"
             case $arch in
                 *osx*)
@@ -104,7 +104,7 @@ if [ $TASK_NWJS -eq 1 ]; then
                     rsync -a "/opt/shortcuts/nw.$arch.desktop" ${MOUNTED_DIR}/
                     chmod +x "${MOUNTED_DIR}/nw.$arch.desktop"
                     ;;
-                *win*)
+                *win*)                    
                     echo "Currently not available for Windows yet"
                     # TODO: Windows shit goes here
                     ;;
