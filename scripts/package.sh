@@ -38,9 +38,9 @@ do
 
         case $arch in
         *osx*)
-            mkdir -p "$MOUNTED_DIR/release/$arch/package.nw/"
+            mkdir -p "$MOUNTED_DIR/release/$arch/app.nw/"
             echo "Copy project source files... "
-            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
+            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/app.nw"
 
             cd "$MOUNTED_DIR/release/$arch/"
 
@@ -52,7 +52,7 @@ do
                 rsync -a "/opt/nwjs/${arch}/" "$MOUNTED_DIR/release/$arch"
             fi
 
-            mv package.nw nwjs.app/Contents/Resources/
+            mv app.nw nwjs.app/Contents/Resources/
             mv nwjs.app "$PACKAGE_NAME.app"
 
             printf "Make zip file... "
@@ -84,7 +84,7 @@ do
             ;;
 
         *linux*)
-            mkdir -p "$MOUNTED_DIR/release/$arch/package.nw/"
+            mkdir -p "$MOUNTED_DIR/release/$arch/app.nw/"
 
             cd "$MOUNTED_DIR/release/$arch/"
 
@@ -97,10 +97,11 @@ do
             fi
 
             echo "Copy project source files... "
-            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/package.nw"
+            rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/app.nw"
 
-            cp /opt/shortcuts/app.desktop "$PACKAGE_NAME.desktop"
-            sed -i "s/Name=app/Name=$PACKAGE_NAME/g" "$PACKAGE_NAME.desktop"
+            cp /opt/shortcuts/nw.$arch.desktop "$PACKAGE_NAME.desktop"
+            sed -i "s/Name=.*/Name=$PACKAGE_NAME/g" "$PACKAGE_NAME.desktop"
+            sed -i 's|Exec=.*|Exec=sh -c "cd `dirname %k`; ./nw app.nw/"|g' "$PACKAGE_NAME.desktop"
             chmod +x "$PACKAGE_NAME.desktop"
 
             printf "Make zip file... "
