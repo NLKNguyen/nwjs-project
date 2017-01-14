@@ -99,8 +99,9 @@ do
             echo "Copy project source files... "
             rsync -a "/tmp/src/" "$MOUNTED_DIR/release/$arch/app.nw"
 
-            cp /opt/shortcuts/nw.$arch.desktop "$PACKAGE_NAME.desktop"
+            cp "/opt/shortcuts/nw.$arch.desktop" "$PACKAGE_NAME.desktop"
             sed -i "s/Name=.*/Name=$PACKAGE_NAME/g" "$PACKAGE_NAME.desktop"
+            # shellcheck disable=SC2016
             sed -i 's|Exec=.*|Exec=sh -c "cd `dirname %k`; ./nw app.nw/"|g' "$PACKAGE_NAME.desktop"
             chmod +x "$PACKAGE_NAME.desktop"
 
