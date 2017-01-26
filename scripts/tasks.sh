@@ -123,11 +123,28 @@ if [ $TASK_NWJS_SDK -eq 1 ]; then
     for arch in $NWJS_SDK_ARCHS
     do
         if [ -d "/opt/nwjs-sdk/$arch" ]; then
-            printf "Copy NW.js runtime for %s to project directory... " "$arch"
+            printf "Copy NW.js SDK runtime for %s to project directory... " "$arch"
 
             mkdir -p ${MOUNTED_DIR}/nwjs-sdk
             rsync -a "/opt/nwjs-sdk/${arch}" ${MOUNTED_DIR}/nwjs-sdk/
 
+            echo "done"
+            
+            printf "Copy shortcut launcher for %s to project directory... " "$arch"
+            case $arch in
+                *osx*)
+                    rsync -a "/opt/shortcuts/nw-sdk.$arch.command" ${MOUNTED_DIR}/
+                    chmod +x "${MOUNTED_DIR}/nw-sdk.$arch.command"
+                    ;;
+                *linux*)
+                    rsync -a "/opt/shortcuts/nw-sdk.$arch.desktop" ${MOUNTED_DIR}/
+                    chmod +x "${MOUNTED_DIR}/nw-sdk.$arch.desktop"
+                    ;;
+                *win*)                    
+                    echo "Currently not available for Windows yet"
+                    # TODO: Windows shit goes here
+                    ;;
+            esac
             echo "done"
         else
             echo "ERROR: unknown architecture $arch for --nwjs-sdk"
