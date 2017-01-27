@@ -57,7 +57,7 @@ do
 
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
-            zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
+            zip -q -r "$PACKAGE_NAME-$arch.zip" "$arch/" && echo "success" || echo "failure"
             echo "done"
             ;;
 
@@ -79,7 +79,7 @@ do
 
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
-            zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
+            zip -q -r "$PACKAGE_NAME-$arch.zip" "$arch/" && echo "success" || echo "failure"
             echo "done"
             ;;
 
@@ -107,7 +107,7 @@ do
 
             printf "Make zip file... "
             cd "$MOUNTED_DIR/release/"
-            zip -r "$PACKAGE_NAME-$arch.zip" "$arch/"
+            zip -q -r "$PACKAGE_NAME-$arch.zip" "$arch/" && echo "success" || echo "failure"
             echo "done"
             ;;
         esac
